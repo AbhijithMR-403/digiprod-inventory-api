@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=digiprod
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    command: bash -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 digiprod.wsgi:application"
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+  
+volumes:
+  db:
+  site:
