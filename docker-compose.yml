@@ -1,0 +1,40 @@
+# version: '3.8'
+
+services:
+  db:
+    image: postgres
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data
+    # environment:
+    #   - POSTGRES_DB=digiprod
+    #   - POSTGRES_USER=postgres
+    #   - POSTGRES_PASSWORD=1234
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+  web:
+    build: .
+    # command: python3 manage.py migrate
+    # volumes:
+    #   - .:/code
+    ports:
+      - "8000:8000"
+    command: sh -c "python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env.dev
+    # environment:
+    #   - SECRET_KEY=django-insecure-tb4_f(=7^@xl%_u^y6q=x6g1_6n!zml6hu0&-!3-z*!zu&bjg=
+    #   - NAME=digiprod
+    #   - USER=postgres
+    #   - PASSWORD=1234
+    #   - DEBUG=True
+    depends_on:
+      # - db
+      db:
+        condition: service_healthy
+# volumes:
+#   postgres_data:
